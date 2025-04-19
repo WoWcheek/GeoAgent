@@ -1,6 +1,7 @@
 import os
 import json
 import dotenv
+import winsound
 from time import sleep
 from core.geo_agent import GeoAgent
 from ui.calibrator import Calibrator
@@ -10,6 +11,9 @@ from langchain_google_genai import GoogleGenerativeAI as Gemini
 from config import ROUNDS_NUMBER, KEYPOINTS_FILE_PATH, PRE_ROUND_DELAY_IN_SECONDS, POST_CALIBRATION_DELAY_IN_SECONDS
 
 def calibrate_user_keypoints():
+    print("Open the browser window.")
+    sleep(2)
+    winsound.Beep(1000, 500)
     calibrator = Calibrator()
     keypoints = calibrator.calibrate_user_keypoints()
     print("Key points calibration completed.")

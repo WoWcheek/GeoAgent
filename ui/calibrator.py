@@ -1,4 +1,5 @@
 import json
+import winsound
 import pyautogui
 from config import CALIBRATION_KEY, KEYPOINTS_FILE_PATH
 from pynput.keyboard import Key, KeyCode, Listener
@@ -22,6 +23,7 @@ class Calibrator:
         if getattr(key, 'char', None) != self.calibration_key:
             return
         x, y = pyautogui.position()
+        winsound.Beep(1000, 500)
         print(f"{self.keypoints[keypoint]} position is ({x}, {y})")
         self.positions[keypoint] = [x, y]
         return False
