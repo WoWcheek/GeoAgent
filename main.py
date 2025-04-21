@@ -7,8 +7,8 @@ from core.geo_agent import GeoAgent
 from ui.calibrator import Calibrator
 from langchain_openai import ChatOpenAI as OpenAI
 from pynput.keyboard import Key, KeyCode, Listener
-from langchain_anthropic import ChatAnthropic as Claude
-from langchain_google_genai import GoogleGenerativeAI as Gemini
+from langchain_anthropic import ChatAnthropic as Anthropic
+from langchain_google_genai import ChatGoogleGenerativeAI as Gemini
 from config import ROUNDS_NUMBER, START_GAME_KEY, KEYPOINTS_FILE, PRE_ROUND_DELAY, POST_CALIBRATION_DELAY
 
 def calibrate_keypoints():
@@ -34,7 +34,7 @@ def run_agent(key: Key | KeyCode | None, keypoints: dict):
     winsound.Beep(1000, 500)
     print("Agent started.")
 
-    agent = GeoAgent(keypoints, LLM_type=OpenAI, LLM_name="gpt-4o")
+    agent = GeoAgent(keypoints, LLM_type=Gemini, LLM_name="gemini-2.0-flash")
 
     for round in range(ROUNDS_NUMBER):
         print(f"\n ~ ~ ~ Round {round+1}/{ROUNDS_NUMBER} ~ ~ ~")
