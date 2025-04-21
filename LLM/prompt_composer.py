@@ -1,9 +1,9 @@
 from typing import List
-from config import PROMPT_FILE_PATH
+from config import PROMPT_FILE
 from langchain_core.messages import HumanMessage
 
 class PromptComposer:
-    def __init__(self, prompt_file_path: str = PROMPT_FILE_PATH):
+    def __init__(self, prompt_file_path: str = PROMPT_FILE):
         with open(prompt_file_path, "r") as f:
             self.text_instructions = f.read()
 
