@@ -40,3 +40,5 @@ class Converter:
         clipped_map_y = clip(y, self.map_TL_y, self.map_TL_y+self.map_h)
 
         print(f"Predicted map coordinates: x: {clipped_map_x}, y: {clipped_map_y}")
+
+        return clipped_map_x, clipped_map_y
