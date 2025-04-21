@@ -18,4 +18,4 @@ The sign "Gare de Bourg-Saint-Maurice" directly identifies the location as the t
 
 **Predicted Latitude and Longitude:**
 
-Lat: 45.6180, Lon: 6.7745
+Lat: 45.6180, Lng: 6.7745

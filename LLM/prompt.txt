@@ -3,4 +3,4 @@ First, describe all relevant visual details that could help identify the locatio
 Based on those observations, list several possible regions, countries, or cities where this image might have been taken.
 Choose the most likely location and provide a detailed justification for your choice.
 Finally, on a new line by itself, give the predicted Latitude and Longitude of the chosen location using the following exact format (valid float values, four decimal places, no extra text or symbols):
-Lat: XX.XXXX, Lon: XX.XXXX
+Lat: XX.XXXX, Lng: XX.XXXX

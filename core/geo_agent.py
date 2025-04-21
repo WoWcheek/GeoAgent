@@ -20,11 +20,11 @@ class GeoAgent:
 
     def get_geolocation_from_response(self, llm_response: AIMessage) -> Tuple[float, float]:
         try:
-            match = re.search(r"lat:\s*(-?\d+\.\d+),\s*lon:\s*(-?\d+\.\d+)", llm_response.content.lower())
+            match = re.search(r"lat:\s*(-?\d+\.\d+),\s*lng:\s*(-?\d+\.\d+)", llm_response.content.lower())
             if match is None: return None
             lat = float(match.group(1))
-            lon = float(match.group(2))
-            return lat, lon
+            lng = float(match.group(2))
+            return lat, lng
         except Exception as e:
             print("Error occured while getting geolocation from LLM response: ", e)
             return None
@@ -37,6 +37,7 @@ class GeoAgent:
         message = self.prompt_composer.compose_prompt([screenshot_b64])
 
         response = self.LLM.invoke([message])
+
         geolocation = self.get_geolocation_from_response(response)
         
         retries = 0
@@ -51,9 +52,10 @@ class GeoAgent:
             geolocation = [1, 1]
         else:
             print(response.content)
-            print(f"Predicted geolocation: lat: {geolocation[0]}, lon: {geolocation[1]}")
+            print(f"Predicted geolocation: lat: {geolocation[0]}, lng: {geolocation[1]}")
 
         map_x, map_y = self.converter.geolocation_to_mercator_map_pixels(*geolocation)
+        print(f"Map coordinates: x: {map_x}, y: {map_y}")
                 
         self.interactor.hover_over_map()
         self.interactor.click_on_position(map_x, map_y)

@@ -10,35 +10,35 @@ class Converter:
 
         self.confirm_button_position = keypoints["confirm"]
 
-        self.kodiak_user_x, self.kodiak_user_y = keypoints["kodiak"] 
-        self.hobart_user_x, self.hobart_user_y = keypoints["hobart"]
-        
-        self.kodiak_true_lat, self.kodiak_true_lon = keypoints["kodiak_true"]
-        self.hobart_true_lat, self.hobart_true_lon = keypoints["hobart_true"]
+        self.kodiak_x, self.kodiak_y = keypoints["kodiak"]
+        self.hobart_x, self.hobart_y = keypoints["hobart"]
+
+        self.kodiak_lat, self.kodiak_lon = keypoints["kodiak_true"]
+        self.hobart_lat, self.hobart_lon = keypoints["hobart_true"]
+
+        self._init_scaling()
 
     def _geo_lat_to_mercator_y(self, lat: float) -> float:
         return math.log(math.tan(math.pi / 4 + math.radians(lat) / 2))
 
-    def geolocation_to_mercator_map_pixels(self, lat: float, lon: float) -> Tuple[int, int]:
-        lon_diff_ref = (self.kodiak_true_lon - self.hobart_true_lon)
-        lon_diff = (self.kodiak_true_lon - lon)
+    def _init_scaling(self):
+        self.lon_range = self.kodiak_lon - self.hobart_lon
+        self.lat_range = self._geo_lat_to_mercator_y(self.kodiak_lat) - self._geo_lat_to_mercator_y(self.hobart_lat)
 
-        x = abs(self.kodiak_user_x - self.hobart_user_x) * (lon_diff / lon_diff_ref) + self.kodiak_user_x
+        self.pixel_dx = self.kodiak_x - self.hobart_x
+        self.pixel_dy = self.kodiak_y - self.hobart_y
 
-        mercator_y1 = self._geo_lat_to_mercator_y(self.kodiak_true_lat)
-        mercator_y2 = self._geo_lat_to_mercator_y(self.hobart_true_lat)
-        mercator_y = self._geo_lat_to_mercator_y(lat)
+    def geolocation_to_mercator_map_pixels(self, lat: float, lng: float) -> Tuple[int, int]:
+        x_ratio = ((self.kodiak_lon - lng) / self.lon_range) if self.lon_range != 0 else 0.0
+        x = self.kodiak_x - self.pixel_dx * x_ratio
 
-        lat_diff_ref = (mercator_y1 - mercator_y2)
-        lat_diff = (mercator_y1 - mercator_y)
+        mercator_lat = self._geo_lat_to_mercator_y(lat)
+        mercator_ref = self._geo_lat_to_mercator_y(self.kodiak_lat)
 
-        y = abs(self.kodiak_user_y - self.hobart_user_y) * (lat_diff / lat_diff_ref) + self.kodiak_user_y
+        y_ratio = ((mercator_ref - mercator_lat) / self.lat_range) if self.lat_range != 0 else 0.0
+        y = self.kodiak_y - self.pixel_dy * y_ratio
 
-        x, y = round(x), round(y)
+        clipped_x = int(clip(round(x), self.map_TL_x, self.map_TL_x + self.map_w))
+        clipped_y = int(clip(round(y), self.map_TL_y, self.map_TL_y + self.map_h))
 
-        clipped_map_x = clip(x, self.map_TL_x, self.map_TL_x+self.map_w)
-        clipped_map_y = clip(y, self.map_TL_y, self.map_TL_y+self.map_h)
-
-        print(f"Predicted map coordinates: x: {clipped_map_x}, y: {clipped_map_y}")
-
-        return clipped_map_x, clipped_map_y
+        return clipped_x, clipped_y
