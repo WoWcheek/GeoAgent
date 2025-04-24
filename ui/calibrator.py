@@ -1,12 +1,12 @@
 import json
 import winsound
 import pyautogui
-from typing import List, Tuple
 from ui.ui_interactor import UIInteractor
+from core.image_handler import ImageHandler
 from geoguessr.client import GeoGuessrClient
 from pynput.keyboard import Key, KeyCode, Listener
 from ui.browser_interactor import BrowserInteractor
-from config import CALIBRATION_KEY, KEYPOINTS_FILE
+from config import CALIBRATION_KEY, KEYPOINTS_FILE, CALIBRATION_MAP_FILE
 
 class Calibrator:
     def __init__(self, calibration_key: str = CALIBRATION_KEY, keypoints_file: str = KEYPOINTS_FILE):
@@ -45,19 +45,36 @@ class Calibrator:
         return False
 
     def calibrate_keypoints(self) -> dict:
-        self._calibrate_user_keypoints()
+        self._calibrate_ui_keypoints()
 
+        calibration_map_image = self._capture_calibration_map()
+        calibration_map_base64 = ImageHandler.PIL_image_to_base64(calibration_map_image)
+
+        with open(CALIBRATION_MAP_FILE, "w") as file:
+            file.write(calibration_map_base64)
+
+        self._calibrate_geo_keypoints()
+            
         game_id = self.browser_interactor.get_game_id()
         self._calibrate_true_geo_keypoints(game_id)
 
-        with open(self.keypoints_file, "w") as f:
-            json.dump(self.positions, f, indent=2)
+        with open(self.keypoints_file, "w") as file:
+            json.dump(self.positions, file, indent=2)
 
         return self.positions
 
-    def _calibrate_user_keypoints(self) -> dict:
-        for keypoint in [*self.ui_keypoints.keys(), *self.geo_keypoints.keys()]:
-            human_readable_keypoint = self.ui_keypoints.get(keypoint, self.geo_keypoints.get(keypoint))
+    def _calibrate_ui_keypoints(self) -> dict:
+        for keypoint in [*self.ui_keypoints.keys()]:
+            human_readable_keypoint = self.ui_keypoints.get(keypoint)
+            print(f"Place cursor at {human_readable_keypoint} and press key '{self.calibration_key}'")
+            with Listener(on_press=lambda key: self._on_press(key, keypoint)) as listener:
+                listener.join(30)
+
+        return self.positions
+    
+    def _calibrate_geo_keypoints(self) -> dict:
+        for keypoint in [*self.geo_keypoints.keys()]:
+            human_readable_keypoint = self.geo_keypoints.get(keypoint)
             print(f"Place cursor at {human_readable_keypoint} and press key '{self.calibration_key}'")
             with Listener(on_press=lambda key: self._on_press(key, keypoint)) as listener:
                 listener.join(30)
@@ -78,3 +95,18 @@ class Calibrator:
         self.positions["hobart_true"] = hobart_coords
 
         return self.positions
+    
+    def _capture_calibration_map(self):
+        ui_interactor = UIInteractor(self.positions)
+        ui_interactor.hover_over_map()
+        return ui_interactor.take_map_screenshot()
+
+    @staticmethod
+    def get_base64_calibration_map() -> str | None:
+        try:
+            with open(CALIBRATION_MAP_FILE) as file:
+                calibration_map_base64_image = file.read()
+        except:
+            print("Couldn't found calibration map file.")
+            calibration_map_base64_image = None
+        return calibration_map_base64_image

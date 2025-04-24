@@ -7,6 +7,7 @@ CALIBRATION_KEY = "c"
 
 PROMPT_FILE = "LLM/prompt.txt"
 KEYPOINTS_FILE = "ui/keypoints.json"
+CALIBRATION_MAP_FILE = "ui/calibration_map.txt"
 TEST_RESPONSE_FILE = "mocks/mocked_response.txt"
 
 CLICK_DURATION = 0.5

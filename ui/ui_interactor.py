@@ -5,19 +5,24 @@ from config import POST_CLICK_DELAY, CLICK_DURATION, POST_ROUND_DELAY
 
 class UIInteractor:
     def __init__(self, keypoints: dict):
-        self.screenshot_region = (keypoints["window_TL"][0],
-                                  keypoints["window_TL"][1],
-                                  keypoints["window_BR"][0] - keypoints["window_TL"][0],
-                                  keypoints["window_BR"][1] - keypoints["window_TL"][1])
+        self.image_region = (keypoints["window_TL"][0],
+                             keypoints["window_TL"][1],
+                             keypoints["window_BR"][0] - keypoints["window_TL"][0],
+                             keypoints["window_BR"][1] - keypoints["window_TL"][1])
         
         self.map_TL_x, self.map_TL_y = keypoints[f"map_TL"]
         self.map_w = keypoints["map_BR"][0] - self.map_TL_x
         self.map_h = keypoints["map_BR"][1] - self.map_TL_y
 
+        self.map_region = (self.map_TL_x, self.map_TL_y, self.map_w, self.map_h)
+
         self.confirm_button_position = keypoints["confirm"]
 
-    def take_screenshot(self) -> Image:
-        return pyautogui.screenshot(region=self.screenshot_region)
+    def take_image_screenshot(self) -> Image:
+        return pyautogui.screenshot(region=self.image_region)
+    
+    def take_map_screenshot(self) -> Image:
+        return pyautogui.screenshot(region=self.map_region)
     
     @staticmethod
     def move_to_position(x: int, y: int) -> None:

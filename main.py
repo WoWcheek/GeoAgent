@@ -2,6 +2,7 @@ import os
 import json
 import dotenv
 import winsound
+from config import *
 from time import sleep
 from core.geo_agent import GeoAgent
 from ui.calibrator import Calibrator
@@ -9,7 +10,6 @@ from langchain_openai import ChatOpenAI as OpenAI
 from pynput.keyboard import Key, KeyCode, Listener
 from langchain_anthropic import ChatAnthropic as Anthropic
 from langchain_google_genai import ChatGoogleGenerativeAI as Gemini
-from config import ROUNDS_NUMBER, START_GAME_KEY, KEYPOINTS_FILE, PRE_ROUND_DELAY, POST_CALIBRATION_DELAY
 
 def calibrate_keypoints():
     print("Open the browser window.")
@@ -46,7 +46,7 @@ def run_agent(key: Key | KeyCode | None, keypoints: dict):
 def main():
     keypoints = dict()
 
-    if not os.path.exists(KEYPOINTS_FILE):
+    if not (os.path.exists(KEYPOINTS_FILE) and os.path.exists(CALIBRATION_MAP_FILE)):
         keypoints = calibrate_keypoints()
     else:
         print("Do you need to calibrate key points? (y/n):", end=' ')

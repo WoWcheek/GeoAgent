@@ -2,8 +2,11 @@ import re
 from typing import Tuple  
 from config import LLM_RETRY_LIMIT
 from core.converter import Converter
+from geoguessr.client import GeoGuessrClient
+from ui.browser_interactor import BrowserInteractor
 from ui.ui_interactor import UIInteractor
 from core.image_handler import ImageHandler
+from mocks.response_mock import ResponseMock
 from langchain_core.messages import AIMessage
 from LLM.prompt_composer import PromptComposer
 from langchain_openai import ChatOpenAI as OpenAI
@@ -15,7 +18,7 @@ class GeoAgent:
         self.image_handler = ImageHandler()
         self.prompt_composer = PromptComposer()
         self.interactor = UIInteractor(keypoints)
-        self.converter = Converter(keypoints)
+        self.converter = Converter(keypoints, self.interactor)
         self.LLM: OpenAI | Gemini | Anthropic = LLM_type(model=LLM_name)
 
     def get_geolocation_from_response(self, llm_response: AIMessage) -> Tuple[float, float]:
@@ -30,13 +33,14 @@ class GeoAgent:
             return None
     
     def play_round(self) -> None:        
-        screenshot = self.interactor.take_screenshot()
+        screenshot = self.interactor.take_image_screenshot()
         self.image_handler.set_image(screenshot)
         screenshot_b64 = self.image_handler.convert_to_base64()
 
         message = self.prompt_composer.compose_prompt([screenshot_b64])
 
-        response = self.LLM.invoke([message])
+        # response = self.LLM.invoke([message])
+        response = ResponseMock()
 
         geolocation = self.get_geolocation_from_response(response)
         
@@ -54,11 +58,23 @@ class GeoAgent:
             print(response.content)
             print(f"Predicted geolocation: lat: {geolocation[0]}, lng: {geolocation[1]}")
 
-        map_x, map_y = self.converter.geolocation_to_mercator_map_pixels(*geolocation)
-        print(f"Map coordinates: x: {map_x}, y: {map_y}")
-                
+        map_x, map_y = self.converter.geolocation_to_map_coordinates(*geolocation)
+        print(f"Map coordinates before correction: x: {map_x}, y: {map_y}")
+
         self.interactor.hover_over_map()
+
+        map_x, map_y = self.converter.adjust_map_coordinates(map_x, map_y)
+        map_x, map_y = self.converter.clip_map_coordinates(map_x, map_y)
+        print(f"Map coordinates after correction: x: {map_x}, y: {map_y}")
+
         self.interactor.click_on_position(map_x, map_y)
         self.interactor.click_on_confirm()
         self.interactor.move_away_from_map()
         self.interactor.go_to_next_round()
+
+        browser_interactor = BrowserInteractor()
+        game_id = browser_interactor.get_game_id()
+        client = GeoGuessrClient()
+        game_data = client.get_game_data(game_id)
+        last_guess = game_data["player"]["guesses"][-1]
+        print(f"Put geolocation: lat: {last_guess['lat']}, lng: {last_guess['lng']}")
