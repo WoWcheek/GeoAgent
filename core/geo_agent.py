@@ -1,17 +1,15 @@
 import re
 from typing import Tuple  
+from LLM.models import *
 from config import LLM_RETRY_LIMIT
 from core.converter import Converter
-from geoguessr.client import GeoGuessrClient
-from ui.browser_interactor import BrowserInteractor
 from ui.ui_interactor import UIInteractor
 from core.image_handler import ImageHandler
 from mocks.response_mock import ResponseMock
+from geoguessr.client import GeoGuessrClient
 from langchain_core.messages import AIMessage
 from LLM.prompt_composer import PromptComposer
-from langchain_openai import ChatOpenAI as OpenAI
-from langchain_anthropic import ChatAnthropic as Anthropic
-from langchain_google_genai import ChatGoogleGenerativeAI as Gemini
+from ui.browser_interactor import BrowserInteractor
 
 class GeoAgent:
     def __init__(self, keypoints: dict, LLM_type: OpenAI | Gemini | Anthropic, LLM_name: str):
@@ -35,6 +33,7 @@ class GeoAgent:
     def play_round(self) -> None:        
         screenshot = self.interactor.take_image_screenshot()
         self.image_handler.set_image(screenshot)
+        self.image_handler.preprocess()
         screenshot_b64 = self.image_handler.convert_to_base64()
 
         message = self.prompt_composer.compose_prompt([screenshot_b64])

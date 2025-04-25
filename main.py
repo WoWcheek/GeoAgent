@@ -4,12 +4,10 @@ import dotenv
 import winsound
 from config import *
 from time import sleep
+from LLM.models import *
 from core.geo_agent import GeoAgent
 from ui.calibrator import Calibrator
-from langchain_openai import ChatOpenAI as OpenAI
 from pynput.keyboard import Key, KeyCode, Listener
-from langchain_anthropic import ChatAnthropic as Anthropic
-from langchain_google_genai import ChatGoogleGenerativeAI as Gemini
 
 def calibrate_keypoints():
     print("Open the browser window.")
@@ -34,7 +32,7 @@ def run_agent(key: Key | KeyCode | None, keypoints: dict):
     winsound.Beep(1000, 500)
     print("Agent started.")
 
-    agent = GeoAgent(keypoints, LLM_type=Gemini, LLM_name="gemini-2.0-flash")
+    agent = GeoAgent(keypoints, LLM_type=Gemini, LLM_name=GEMINI_LLM_NAME)
 
     for round in range(ROUNDS_NUMBER):
         print(f"\n ~ ~ ~ Round {round+1}/{ROUNDS_NUMBER} ~ ~ ~")

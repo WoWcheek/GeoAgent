@@ -2,7 +2,8 @@ import cv2
 import base64
 import numpy as np
 from io import BytesIO
-from PIL.Image import Image
+from PIL.Image import Image, Resampling
+from PIL.ImageEnhance import Contrast, Sharpness
 
 class ImageHandler:
     def __init__(self, image: Image | None = None):
@@ -10,6 +11,26 @@ class ImageHandler:
 
     def set_image(self, image: Image) -> None:
         self.image = image
+
+    def preprocess(self, crop_fraction: float = 0.8) -> None:
+        if self.image is None: raise ValueError("No image to preprocess")
+
+        img = self.image.convert("RGB")
+        width, height = img.size
+
+        new_width = int(width * crop_fraction)
+        new_height = int(height * crop_fraction)
+
+        left = (width - new_width) // 2
+        top = (height - new_height) // 2
+
+        img = img.crop((left, top, left + new_width, top + new_height))
+        img = img.resize((512, 512), Resampling.LANCZOS)
+        
+        img = Contrast(img).enhance(1.3)
+        img = Sharpness(img).enhance(1.5)
+
+        self.image = img
 
     def convert_to_base64(self) -> str:
         if self.image is None:
