@@ -9,12 +9,14 @@ class UIInteractor:
                              keypoints["window_TL"][1],
                              keypoints["window_BR"][0] - keypoints["window_TL"][0],
                              keypoints["window_BR"][1] - keypoints["window_TL"][1])
-        
-        self.map_TL_x, self.map_TL_y = keypoints[f"map_TL"]
-        self.map_w = keypoints["map_BR"][0] - self.map_TL_x
-        self.map_h = keypoints["map_BR"][1] - self.map_TL_y
 
-        self.map_region = (self.map_TL_x, self.map_TL_y, self.map_w, self.map_h)
+        self.map_region = (keypoints["point_NW"][0],
+                           keypoints["point_NW"][1],
+                           keypoints["point_SE"][0] - keypoints["point_NW"][0],
+                           keypoints["point_SE"][1] - keypoints["point_NW"][1])
+        
+        self.position_inside_map = keypoints["point_SE"]
+        self.position_outside_map = keypoints["window_BR"]
 
         self.confirm_button_position = keypoints["confirm"]
 
@@ -30,12 +32,10 @@ class UIInteractor:
         sleep(POST_CLICK_DELAY)
 
     def hover_over_map(self) -> None:
-        map_bottom_right_position = (self.map_TL_x + self.map_w - 10, self.map_TL_y + self.map_h - 10)
-        UIInteractor.move_to_position(*map_bottom_right_position)
+        UIInteractor.move_to_position(*self.position_inside_map)
 
     def move_away_from_map(self) -> None:
-        position_outside_of_map = (self.map_TL_x + self.map_w + 10, self.map_TL_y + self.map_h + 10)
-        UIInteractor.move_to_position(*position_outside_of_map)
+        UIInteractor.move_to_position(*self.position_outside_map)
 
     @staticmethod
     def click_on_position(x: int, y: int) -> None:

@@ -10,38 +10,34 @@ class Converter:
     def __init__(self, keypoints: dict, ui_interactor: UIInteractor):
         self.ui_interactor = ui_interactor
 
-        self.map_TL_x, self.map_TL_y = keypoints["map_TL"]
-        self.map_w = keypoints["map_BR"][0] - self.map_TL_x
-        self.map_h = keypoints["map_BR"][1] - self.map_TL_y
-
-        self.kodiak_user_x, self.kodiak_user_y = keypoints["kodiak"] 
-        self.hobart_user_x, self.hobart_user_y = keypoints["hobart"]
+        self.point_NW_user_x, self.point_NW_user_y = keypoints["point_NW"] 
+        self.point_SE_user_x, self.point_SE_user_y = keypoints["point_SE"]
         
-        self.kodiak_true_lat, self.kodiak_true_lon = keypoints["kodiak_true"]
-        self.hobart_true_lat, self.hobart_true_lon = keypoints["hobart_true"]
+        self.point_NW_true_lat, self.point_NW_true_lon = keypoints["point_NW_true"]
+        self.point_SE_true_lat, self.point_SE_true_lon = keypoints["point_SE_true"]
 
-        self.kodiak_true_mercator = self._geo_lat_to_mercator_y(self.kodiak_true_lat)
-        self.hobart_true_mercator = self._geo_lat_to_mercator_y(self.hobart_true_lat)
+        self.point_NW_true_mercator = self._geo_lat_to_mercator_y(self.point_NW_true_lat)
+        self.point_SE_true_mercator = self._geo_lat_to_mercator_y(self.point_SE_true_lat)
 
-        self.lon_diff_ref = (self.kodiak_true_lon - self.hobart_true_lon)
-        self.lat_diff_ref = (self.kodiak_true_mercator - self.hobart_true_mercator)
+        self.lon_diff_ref = (self.point_NW_true_lon - self.point_SE_true_lon)
+        self.lat_diff_ref = (self.point_NW_true_mercator - self.point_SE_true_mercator)
 
     def _geo_lat_to_mercator_y(self, lat: float) -> float:
         return math.log(math.tan(math.pi / 4 + math.radians(lat) / 2))
 
     def geolocation_to_map_coordinates(self, lat: float, lon: float) -> Tuple[float, float]:
-        lon_diff = (self.kodiak_true_lon - lon)
-        x = abs(self.kodiak_user_x - self.hobart_user_x) * (lon_diff / self.lon_diff_ref) + self.kodiak_user_x
+        lon_diff = (self.point_NW_true_lon - lon)
+        x = abs(self.point_NW_user_x - self.point_SE_user_x) * (lon_diff / self.lon_diff_ref) + self.point_NW_user_x
 
         mercator_y = self._geo_lat_to_mercator_y(lat)
-        lat_diff = (self.kodiak_true_mercator - mercator_y)
-        y = abs(self.kodiak_user_y - self.hobart_user_y) * (lat_diff / self.lat_diff_ref) + self.kodiak_user_y
+        lat_diff = (self.point_NW_true_mercator - mercator_y)
+        y = abs(self.point_NW_user_y - self.point_SE_user_y) * (lat_diff / self.lat_diff_ref) + self.point_NW_user_y
 
         return x, y
     
     def clip_map_coordinates(self, x: float, y: float) -> Tuple[float, float]:
-        clipped_map_x = clip(x, self.map_TL_x, self.map_TL_x+self.map_w)
-        clipped_map_y = clip(y, self.map_TL_y, self.map_TL_y+self.map_h)
+        clipped_map_x = clip(x, self.point_NW_user_x, self.point_SE_user_x)
+        clipped_map_y = clip(y, self.point_NW_user_y, self.point_SE_user_y)
         return clipped_map_x, clipped_map_y
     
     def adjust_map_coordinates(self, x: float, y: float) -> Tuple[float, float]:
