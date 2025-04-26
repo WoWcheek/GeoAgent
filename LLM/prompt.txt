@@ -1,6 +1,21 @@
-Analyze the following image and try to determine the geographic location where it was taken.
-First, describe all relevant visual details that could help identify the location, such as natural features, architecture, language on signs, road markings, vehicle plates, or vegetation.
-Based on those observations, list several possible regions, countries, or cities where this image might have been taken.
-Choose the most likely location and provide a detailed justification for your choice.
-Finally, on a new line by itself, give the predicted Latitude and Longitude of the chosen location using the following exact format (valid float values, four decimal places, no extra text or symbols):
+Carefully analyze the details present in this Google Street View image to determine its precise geographic location.
+
+Begin by thoroughly describing all visual elements that offer clues about the location. This includes, but is not limited to:
+
+- Architectural styles: Note any distinctive building designs or materials.
+- Natural environment: Describe the landscape, including terrain, vegetation types (e.g., trees, shrubs), and climate indicators.
+- Linguistic cues: Identify any text visible on signs (street names, business names, advertisements), paying attention to the language and website domains (if visible and identifiable).
+- Transportation elements: Observe road markings, traffic signs, vehicle types and license plates (if visible and identifiable), and the side of the road on which traffic drives.
+- Cultural indicators: Look for any flags, religious symbols, or other cultural artifacts that might suggest a specific region.
+
+Based on your detailed visual analysis, reason step-by-step to narrow down the possible locations. Consider different scales – from continent to specific city or even neighborhood.
+
+First, list at least three plausible candidate locations (regions, countries, or cities) that align with your observations.
+
+Then, select the single most likely location based on the preponderance of evidence from your analysis. Provide a comprehensive justification for this choice, explicitly linking specific visual details to your conclusion. Explain why other candidate locations are less likely.
+
+Finally, and critically, on a new line by itself, provide the predicted Latitude and Longitude of the chosen location in the exact format:
+
 Lat: XX.XXXX, Lng: XX.XXXX
+
+Ensure that the latitude and longitude values are valid floating-point numbers with exactly four decimal places. Do not include any additional text, symbols, or formatting around the latitude and longitude.
