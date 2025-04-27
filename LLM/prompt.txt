@@ -1,21 +1,22 @@
-Carefully analyze the details present in this Google Street View image to determine its precise geographic location.
+Analyze the following Google Street View image and make your best possible estimate of where it was taken.
 
-Begin by thoroughly describing all visual elements that offer clues about the location. This includes, but is not limited to:
+First, briefly describe important visual details, such as:
 
-- Architectural styles: Note any distinctive building designs or materials.
-- Natural environment: Describe the landscape, including terrain, vegetation types (e.g., trees, shrubs), and climate indicators.
-- Linguistic cues: Identify any text visible on signs (street names, business names, advertisements), paying attention to the language and website domains (if visible and identifiable).
-- Transportation elements: Observe road markings, traffic signs, vehicle types and license plates (if visible and identifiable), and the side of the road on which traffic drives.
-- Cultural indicators: Look for any flags, religious symbols, or other cultural artifacts that might suggest a specific region.
+Natural environment (landscape, vegetation, climate hints)
 
-Based on your detailed visual analysis, reason step-by-step to narrow down the possible locations. Consider different scales – from continent to specific city or even neighborhood.
+Architecture and building styles
 
-First, list at least three plausible candidate locations (regions, countries, or cities) that align with your observations.
+Language or writing on signs
 
-Then, select the single most likely location based on the preponderance of evidence from your analysis. Provide a comprehensive justification for this choice, explicitly linking specific visual details to your conclusion. Explain why other candidate locations are less likely.
+Road markings, traffic signs, vehicle types, and license plates
 
-Finally, and critically, on a new line by itself, provide the predicted Latitude and Longitude of the chosen location in the exact format:
+Cultural symbols (flags, religious signs, local businesses)
 
+Based on these observations, reason through possible locations. List 2–4 likely regions, countries, or cities.
+
+Then, select the single most likely location and explain your choice clearly, linking specific visual details to your conclusion. If full certainty is not possible, make an educated guess based on the strongest evidence.
+
+Finally, on a new line by itself, write the predicted Latitude and Longitude in the exact format:
 Lat: XX.XXXX, Lng: XX.XXXX
 
-Ensure that the latitude and longitude values are valid floating-point numbers with exactly four decimal places. Do not include any additional text, symbols, or formatting around the latitude and longitude.
+Only provide valid float values with exactly four decimal places.
