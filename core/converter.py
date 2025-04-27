@@ -49,7 +49,7 @@ class Converter:
 
         (shift_x, shift_y), _ = cv2.phaseCorrelate(calibration_map, current_map)
             
-        print(f"Detected shift: dx = {shift_x:.2f}, dy = {shift_y:.2f}")
+        print(f"Detected shift: x = {shift_x:.2f}, y = {shift_y:.2f}")
 
         x += shift_x
         y += shift_y

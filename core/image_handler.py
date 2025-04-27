@@ -2,11 +2,12 @@ import cv2
 import base64
 import numpy as np
 from io import BytesIO
+from typing import Optional
 from PIL.Image import Image, Resampling
 from PIL.ImageEnhance import Contrast, Sharpness
 
 class ImageHandler:
-    def __init__(self, image: Image | None = None):
+    def __init__(self, image: Optional[Image] = None):
         self.image = image
 
     def set_image(self, image: Image) -> None:

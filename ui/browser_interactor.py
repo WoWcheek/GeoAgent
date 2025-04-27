@@ -1,3 +1,4 @@
+from typing import Optional
 from pywinauto import Application
 from config import SUPPORTED_BROWSERS
 from pywinauto.application import WindowSpecification
@@ -15,7 +16,7 @@ class BrowserInteractor:
             print(f"There is no {browser_name} browser open.")
             return False
 
-    def _get_url(self, browser_window: WindowSpecification) -> str | None:
+    def _get_url(self, browser_window: WindowSpecification) -> Optional[str]:
         edit_controls = browser_window.descendants(control_type="Edit")
         for control in edit_controls:
             try:
@@ -25,12 +26,12 @@ class BrowserInteractor:
             except: continue
         return None
 
-    def _get_game_id_from_url(self, url: str) -> str | None:
+    def _get_game_id_from_url(self, url: str) -> Optional[str]:
         if url is None: return None
         game_id = url.split("/")[-1].split("?")[0]
         return game_id
 
-    def get_game_id(self) -> str | None:
+    def get_game_id(self) -> Optional[str]:
         for browser_name in SUPPORTED_BROWSERS:
             is_connected = self._connect_to_browser(browser_name)
             if is_connected: break

@@ -1,8 +1,8 @@
 import re
-from typing import Tuple  
 from LLM.models import *
 from config import LLM_RETRY_LIMIT
 from core.converter import Converter
+from typing import Tuple, List, Optional
 from ui.ui_interactor import UIInteractor
 from core.image_handler import ImageHandler
 from mocks.response_mock import ResponseMock
@@ -12,14 +12,14 @@ from LLM.prompt_composer import PromptComposer
 from ui.browser_interactor import BrowserInteractor
 
 class GeoAgent:
-    def __init__(self, keypoints: dict, LLM_type: OpenAI | Gemini | Anthropic, LLM_name: str):
+    def __init__(self, keypoints: dict, LLMs: List[Tuple[OpenAI | Gemini | Anthropic, str]]):
         self.image_handler = ImageHandler()
         self.prompt_composer = PromptComposer()
         self.interactor = UIInteractor(keypoints)
         self.converter = Converter(keypoints, self.interactor)
-        self.LLM: OpenAI | Gemini | Anthropic = LLM_type(model=LLM_name)
+        self.LLMs = [LLM_type(model=LLM_name) for (LLM_type, LLM_name) in LLMs]
 
-    def get_geolocation_from_response(self, llm_response: AIMessage) -> Tuple[float, float]:
+    def get_geolocation_from_response(self, llm_response: AIMessage) -> Optional[Tuple[float, float]]:
         try:
             match = re.search(r"lat:\s*(-?\d+\.\d+),\s*lng:\s*(-?\d+\.\d+)", llm_response.content.lower())
             if match is None: return None
@@ -27,9 +27,23 @@ class GeoAgent:
             lng = float(match.group(2))
             return lat, lng
         except Exception as e:
-            print("Error occured while getting geolocation from LLM response: ", e)
+            print("Error while parsing LLM response:", e)
             return None
-    
+
+    def _aggregate_model_geolocations(self, responses: List[AIMessage]) -> Optional[Tuple[float, float]]:
+        coords = []
+        for i, response in enumerate(responses):
+            print(f"\n~ ~ ~ {type(self.LLMs[i]).__name__} 's response ~ ~ ~")
+            print(response.content)
+            geolocation = self.get_geolocation_from_response(response)
+            if geolocation:
+                coords.append(geolocation)
+        if not coords:
+            return None
+        lat = sum([c[0] for c in coords]) / len(coords)
+        lng = sum([c[1] for c in coords]) / len(coords)
+        return lat, lng
+
     def play_round(self) -> None:        
         screenshot = self.interactor.take_image_screenshot()
         self.image_handler.set_image(screenshot)
@@ -38,24 +52,20 @@ class GeoAgent:
 
         message = self.prompt_composer.compose_prompt([screenshot_b64])
 
-        # response = self.LLM.invoke([message])
-        response = ResponseMock()
-
-        geolocation = self.get_geolocation_from_response(response)
-        
+        geolocation = None
         retries = 0
-        while geolocation is None and retries < LLM_RETRY_LIMIT:
-            print(f"Retry {retries + 1} to get a geolocation...")
-            response = self.LLM.invoke([message])
-            geolocation = self.get_geolocation_from_response(response)
+        while geolocation is None and retries <= LLM_RETRY_LIMIT:
+            print(f"Attempt {retries + 1} to get geolocation...")
+            responses = [llm.invoke([message]) for llm in self.LLMs]
+            # responses = [ResponseMock(), ResponseMock((20, 20)), ResponseMock((30, 0))]
+            geolocation = self._aggregate_model_geolocations(responses)
             retries += 1
 
         if geolocation is None:
-            print(f"Can't get a geolocation after {LLM_RETRY_LIMIT} retries.")
+            print(f"\nFailed to get a geolocation after {LLM_RETRY_LIMIT} retries.")
             geolocation = [1, 1]
         else:
-            print(response.content)
-            print(f"Predicted geolocation: lat: {geolocation[0]}, lng: {geolocation[1]}")
+            print(f"\nPredicted geolocation (aggregated): lat: {geolocation[0]}, lng: {geolocation[1]}")
 
         map_x, map_y = self.converter.geolocation_to_map_coordinates(*geolocation)
         print(f"Map coordinates before correction: x: {map_x}, y: {map_y}")

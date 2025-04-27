@@ -1,6 +1,7 @@
 import json
 import winsound
 import pyautogui
+from typing import Optional
 from ui.ui_interactor import UIInteractor
 from core.image_handler import ImageHandler
 from geoguessr.client import GeoGuessrClient
@@ -23,7 +24,7 @@ class Calibrator:
         self.geoguessr_client = GeoGuessrClient()
         self.browser_interactor = BrowserInteractor()
 
-    def _on_press_ui_keypoints(self, key: Key | KeyCode | None, keypoint: str):
+    def _on_press_ui_keypoints(self, key: Optional[Key | KeyCode], keypoint: str):
         if getattr(key, 'char', None) != CALIBRATION_KEY: return
 
         x, y = pyautogui.position()
@@ -34,7 +35,7 @@ class Calibrator:
 
         return False
     
-    def _on_press_geo_keypoints(self, key: Key | KeyCode | None, keypoint: str):
+    def _on_press_geo_keypoints(self, key: Optional[Key | KeyCode], keypoint: str):
         if getattr(key, 'char', None) != CALIBRATION_KEY: return
         
         x, y = pyautogui.position()
@@ -98,7 +99,7 @@ class Calibrator:
         return ui_interactor.take_map_screenshot()
 
     @staticmethod
-    def get_base64_calibration_map() -> str | None:
+    def get_base64_calibration_map() -> Optional[str]:
         try:
             with open(CALIBRATION_MAP_FILE) as file:
                 calibration_map_base64_image = file.read()
