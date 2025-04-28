@@ -19,12 +19,12 @@ def calibrate_keypoints():
     print("Key points calibration completed.")
     return keypoints
 
-def run_agent_when_ready(keypoints: dict, models: List[Tuple[OpenAI | Gemini | Anthropic, str]]):
+def run_agent_when_ready(keypoints: dict, models: List[Tuple[LLM_type, str]]):
     print(f"Press key '{START_GAME_KEY}' to start the agent.")
     with Listener(on_press=lambda key: run_agent(key, keypoints, models)) as listener:
         listener.join()
 
-def run_agent(key: Optional[Key | KeyCode], keypoints: dict, models: List[Tuple[OpenAI | Gemini | Anthropic, str]]):
+def run_agent(key: Optional[Key | KeyCode], keypoints: dict, models: List[Tuple[LLM_type, str]]):
     if getattr(key, 'char', None) != START_GAME_KEY:
         return
 
@@ -34,15 +34,11 @@ def run_agent(key: Optional[Key | KeyCode], keypoints: dict, models: List[Tuple[
     print("Agent started.")
 
     agent = GeoAgent(keypoints, LLMs=models)
-
-    for round in range(ROUNDS_NUMBER):
-        print(f"\n ~ ~ ~ Round {round+1}/{ROUNDS_NUMBER} ~ ~ ~")
-        sleep(PRE_ROUND_DELAY)
-        agent.play_round()
+    agent.run()
     
     return False
 
-def select_llm_strategy() -> List[Tuple[OpenAI | Gemini | Anthropic, str]]:
+def select_llm_strategy() -> List[Tuple[LLM_type, str]]:
     print("\nAvailable LLM models:")
     print(f"1 — Gemini: {GEMINI_MODEL_NAME}")
     print(f"2 — OpenAI: {OPENAI_MODEL_NAME}")

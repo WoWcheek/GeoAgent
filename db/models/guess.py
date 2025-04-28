@@ -9,7 +9,8 @@ class Guess(Base):
     model_id = Column(Integer, ForeignKey('Models.id'), nullable=False)
     predicted_latitude = Column(Float)
     predicted_longitude = Column(Float)
-    reasoning = Column(String, nullable=True)
+    reasoning = Column(String)
+    seconds_spent = Column(Integer)
 
     round = relationship('Round', back_populates='guesses')
     model = relationship('Model', back_populates='guesses')

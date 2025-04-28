@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, String, Float
 class Game(Base):
     __tablename__ = 'Games'
     token = Column(String(100), primary_key=True)
-    game_map = Column(String(100))
+    map = Column(String(100))
     rounds_count = Column(Integer)
     total_score = Column(Integer)
     total_distance_km = Column(Float)
