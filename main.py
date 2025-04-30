@@ -2,12 +2,12 @@ import os
 import json
 import dotenv
 import winsound
+from LLM import *
 from config import *
 from time import sleep
-from LLM.models import *
+from typing import List
 from core.geo_agent import GeoAgent
 from ui.calibrator import Calibrator
-from typing import List, Tuple, Optional
 from pynput.keyboard import Key, KeyCode, Listener
 
 def calibrate_keypoints():
@@ -19,12 +19,12 @@ def calibrate_keypoints():
     print("Key points calibration completed.")
     return keypoints
 
-def run_agent_when_ready(keypoints: dict, models: List[Tuple[LLM_type, str]]):
+def run_agent_when_ready(keypoints: dict, models: List[LlmWrapper]):
     print(f"Press key '{START_GAME_KEY}' to start the agent.")
     with Listener(on_press=lambda key: run_agent(key, keypoints, models)) as listener:
         listener.join()
 
-def run_agent(key: Optional[Key | KeyCode], keypoints: dict, models: List[Tuple[LLM_type, str]]):
+def run_agent(key: Key | KeyCode, keypoints: dict, models: List[LlmWrapper]):
     if getattr(key, 'char', None) != START_GAME_KEY:
         return
 
@@ -33,12 +33,12 @@ def run_agent(key: Optional[Key | KeyCode], keypoints: dict, models: List[Tuple[
     winsound.Beep(1000, 500)
     print("Agent started.")
 
-    agent = GeoAgent(keypoints, LLMs=models)
+    agent = GeoAgent(keypoints, models)
     agent.run()
     
     return False
 
-def select_llm_strategy() -> List[Tuple[LLM_type, str]]:
+def select_llm_strategy() -> List[LlmWrapper]:
     print("\nAvailable LLM models:")
     print(f"1 — Gemini: {GEMINI_MODEL_NAME}")
     print(f"2 — OpenAI: {OPENAI_MODEL_NAME}")
@@ -47,9 +47,9 @@ def select_llm_strategy() -> List[Tuple[LLM_type, str]]:
     user_input = input().strip()
 
     model_mapping = {
-        '1': (Gemini, GEMINI_MODEL_NAME),
-        '2': (OpenAI, OPENAI_MODEL_NAME),
-        '3': (Anthropic, ANTHROPIC_MODEL_NAME)
+        '1': LlmWrapper(Gemini, GEMINI_MODEL_NAME, GEMINI_PROMPT_FILE),
+        '2': LlmWrapper(OpenAI, OPENAI_MODEL_NAME, OPEN_AI_PROMPT_FILE),
+        '3': LlmWrapper(Anthropic, ANTHROPIC_MODEL_NAME, ANTHROPIC_PROMPT_FILE)
     }
 
     separators = [',', ' ']
@@ -92,8 +92,8 @@ def main():
             print("Invalid input. Exiting.")
             return
     
-    selected_models = select_llm_strategy()
-    run_agent_when_ready(keypoints, selected_models)
+    selected_llms = select_llm_strategy()
+    run_agent_when_ready(keypoints, selected_llms)
 
 if __name__ == "__main__":
     dotenv.load_dotenv()

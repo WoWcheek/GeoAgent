@@ -2,23 +2,15 @@ import cv2
 import base64
 import numpy as np
 from io import BytesIO
-from typing import Optional
 from PIL.Image import Image, Resampling
 from PIL.ImageEnhance import Contrast, Sharpness
 
 class ImageHandler:
-    def __init__(self, image: Optional[Image] = None):
-        self.image = image
+    @staticmethod
+    def preprocess(image: Image, crop_fraction: float = 0.8) -> Image:
+        img = image.convert("RGB")
 
-    def set_image(self, image: Image) -> None:
-        self.image = image
-
-    def preprocess(self, crop_fraction: float = 0.8) -> None:
-        if self.image is None: raise ValueError("No image to preprocess")
-
-        img = self.image.convert("RGB")
         width, height = img.size
-
         new_width = int(width * crop_fraction)
         new_height = int(height * crop_fraction)
 
@@ -31,14 +23,8 @@ class ImageHandler:
         img = Contrast(img).enhance(1.3)
         img = Sharpness(img).enhance(1.5)
 
-        self.image = img
+        return img
 
-    def convert_to_base64(self) -> str:
-        if self.image is None:
-            raise ValueError("No image provided")
-
-        return ImageHandler.PIL_image_to_base64(self.image)
-    
     @staticmethod
     def PIL_image_to_base64(pil_image: Image) -> str:
         buffer = BytesIO()

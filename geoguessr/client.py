@@ -1,11 +1,12 @@
 import os
 from requests import Session
-from config import GEOGUESSR_API_BASE_URL
+
+GEOGUESSR_API_BASE_URL = "https://www.geoguessr.com/api"
 
 class GeoGuessrClient:
     def __init__(self):
-        self.base_url = GEOGUESSR_API_BASE_URL
         self.session = Session()
+        self.base_url = GEOGUESSR_API_BASE_URL
         self.session.cookies.set("_ncfa", os.environ.get("NCFA_TOKEN"), domain="www.geoguessr.com")
     
     def get_game_data(self, game_id: str):

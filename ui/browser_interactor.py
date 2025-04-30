@@ -1,7 +1,8 @@
 from typing import Optional
 from pywinauto import Application
-from config import SUPPORTED_BROWSERS
 from pywinauto.application import WindowSpecification
+
+SUPPORTED_BROWSERS = ["Chrome", "Firefox", "Edge", "Opera"]
 
 class BrowserInteractor:
     def __init__(self):

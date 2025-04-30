@@ -5,7 +5,11 @@ class GameRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def add_game(self, game: Game) -> Game:
+    def add_game_if_not_exists(self, game: Game) -> Game:
+        existing_game = self.session.query(Game).filter_by(token=game.token).first()
+        if existing_game:
+            return existing_game
+    
         self.session.add(game)
         self.session.commit()
         return game
