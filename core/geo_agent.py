@@ -95,6 +95,7 @@ class GeoAgent:
 
     def _save_completed_round_data(self, round_db_initial: Round) -> Round:
         game_data = self.geoguessr_client.get_game_data(self.game_id)
+        round_db_initial.round_number = len(game_data["player"]["guesses"])
         last_guess_available = game_data["player"]["guesses"][-1]
 
         round_db_initial.aggregated_latitude = last_guess_available["lat"]

@@ -40,12 +40,12 @@ class LlmWrapper:
     def extract_geolocation_from_llm_response(self, llm_response: str) -> Geolocation:
         try:
             match = re.search(r"lat:\s*(-?\d+\.\d+),\s*lng:\s*(-?\d+\.\d+)", llm_response.lower())
-            if match is None: raise Exception("Geolocation is not provided or does not matcn required format.")
+            if match is None: raise Exception("Geolocation is not provided or does not match required format.")
             lat = float(match.group(1))
             lng = float(match.group(2))
             return Geolocation(lat, lng)
         except Exception as e:
-            print("Error while parsing LLM response:", e)
+            print("Error while parsing LLM response:", e, llm_response, sep="\n")
             return Geolocation(None, None)
     
     def get_llm_guess(self, images_base64: List[str]) -> LlmGuess:
@@ -54,8 +54,8 @@ class LlmWrapper:
         request_start_time = time()
         while not geolocation.is_valid() and retries <= LLM_RETRY_LIMIT:
             message = self.compose_prompt(images_base64)
-            # response = self.model.invoke([message])
-            response = ResponseMock()
+            response = self.model.invoke([message])
+            # response = ResponseMock()
             geolocation = self.extract_geolocation_from_llm_response(response.content)
             retries += 1
         request_end_time = time()
