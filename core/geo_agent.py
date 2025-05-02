@@ -37,8 +37,8 @@ class GeoAgent:
         screenshot = ImageHandler.preprocess(screenshot)
         screenshot_b64 = ImageHandler.PIL_image_to_base64(screenshot)
 
-        image_path = image_repo.save_image(screenshot, self.game_id, round_number)
-        round_db_initial = self._save_initial_round_data(round_number, image_path)
+        image_url = image_repo.save_image(screenshot, self.game_id, round_number)
+        round_db_initial = self._save_initial_round_data(round_number, image_url)
 
         geolocations = []
         for llm in self.llm_wrappers:

@@ -20,8 +20,8 @@ class ImageHandler:
         img = img.crop((left, top, left + new_width, top + new_height))
         img = img.resize((512, 512), Resampling.LANCZOS)
         
-        img = Contrast(img).enhance(1.3)
-        img = Sharpness(img).enhance(1.5)
+        img = Contrast(img).enhance(1.1)
+        img = Sharpness(img).enhance(1.3)
 
         return img
 

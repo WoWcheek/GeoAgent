@@ -1,14 +1,22 @@
 import os
+from io import BytesIO
 from PIL.Image import Image
+from config import AZURE_STORAGE_CONTAINER_NAME
+from azure.storage.blob import BlobServiceClient, ContentSettings
 
 class ImageRepository:
     def __init__(self):
-        self.base_location = "screenshots"
-        os.makedirs(self.base_location, exist_ok=True)
-    
+        connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+        self.container_name = AZURE_STORAGE_CONTAINER_NAME
+        self.image_settings = ContentSettings(content_type='image/png')
+
+        blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+        self.container_client = blob_service_client.get_container_client(self.container_name)
+
     def save_image(self, image: Image, game_id: str, round_number: int) -> str:
-        game_images_path = os.path.join(self.base_location, game_id)
-        os.makedirs(game_images_path, exist_ok=True)
-        image_full_path = os.path.join(game_images_path, f"{round_number}.png")
-        image.save(image_full_path)
-        return image_full_path
+        image_path = f"{game_id}/{round_number}.png"
+        img_bytes = BytesIO()
+        image.save(img_bytes, format='PNG')
+        img_bytes.seek(0)
+        self.container_client.upload_blob(image_path, img_bytes, content_settings=self.image_settings)
+        return f"{self.container_name}:{image_path}"
