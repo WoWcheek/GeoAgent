@@ -1,8 +1,7 @@
 import pyautogui
 from PIL import Image
-from random import random
 from time import sleep
-from config import POST_CLICK_DELAY, CLICK_DURATION, POST_ROUND_DELAY
+from config import ROUND_DELAY
 
 class UIInteractor:
     def __init__(self, keypoints: dict):
@@ -25,16 +24,12 @@ class UIInteractor:
         return pyautogui.screenshot(region=self.image_region)
     
     def take_map_screenshot(self) -> Image:
-        image = pyautogui.screenshot(region=self.map_region)
-        random_num = random()
-        print(random_num)
-        image.save(f"mocks/{random_num}.png")
-        return image
+        return pyautogui.screenshot(region=self.map_region)
     
     @staticmethod
     def move_to_position(x: int, y: int) -> None:
-        pyautogui.moveTo(x, y, duration=CLICK_DURATION)
-        sleep(POST_CLICK_DELAY)
+        pyautogui.moveTo(x, y, duration=0.5)
+        sleep(1)
 
     def hover_over_map(self) -> None:
         UIInteractor.move_to_position(*self.position_inside_map)
@@ -44,8 +39,8 @@ class UIInteractor:
 
     @staticmethod
     def click_on_position(x: int, y: int) -> None:
-        pyautogui.click(x, y, duration=CLICK_DURATION)
-        sleep(POST_CLICK_DELAY)
+        pyautogui.click(x, y, duration=0.5)
+        sleep(1)
     
     def click_on_confirm(self) -> None:
         UIInteractor.click_on_position(*self.confirm_button_position)
@@ -53,4 +48,4 @@ class UIInteractor:
     @staticmethod
     def go_to_next_round() -> None:
         pyautogui.press(" ")
-        sleep(POST_ROUND_DELAY)
+        sleep(ROUND_DELAY)

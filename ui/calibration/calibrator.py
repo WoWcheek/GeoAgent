@@ -1,7 +1,9 @@
 import json
 import winsound
 import pyautogui
+import tkinter as tk
 from typing import Optional
+from tkinter import messagebox
 from ui.ui_interactor import UIInteractor
 from core.image_handler import ImageHandler
 from geoguessr.client import GeoGuessrClient
@@ -10,10 +12,10 @@ from ui.browser_interactor import BrowserInteractor
 from config import CALIBRATION_KEY, KEYPOINTS_FILE, CALIBRATION_MAP_FILE
 
 class Calibrator:
-    def __init__(self):
+    def __init__(self, root: tk.Tk):
         self.ui_keypoints = {
             "window_TL": "Window top left corner",
-            "window_BR": "Window Bottom Right corner",
+            "window_BR": "Window bottom right corner",
             "confirm": "Confirm button",
         }
         self.geo_keypoints = {
@@ -23,34 +25,30 @@ class Calibrator:
         self.positions = {}
         self.geoguessr_client = GeoGuessrClient()
         self.browser_interactor = BrowserInteractor()
+        self.root = root
+
+    def show_instruction(self, text: str):
+        messagebox.showinfo("Calibration", text, parent=self.root)
 
     def on_press_ui_keypoints(self, key: Optional[Key | KeyCode], keypoint: str):
-        if getattr(key, 'char', None) != CALIBRATION_KEY: return
-
+        if getattr(key, 'char', None) != CALIBRATION_KEY:
+            return
         x, y = pyautogui.position()
         winsound.Beep(1000, 500)
-
-        print(f"{self.ui_keypoints[keypoint]} position is ({x}, {y})")
         self.positions[keypoint] = [x, y]
-
         return False
-    
+
     def on_press_geo_keypoints(self, key: Optional[Key | KeyCode], keypoint: str):
-        if getattr(key, 'char', None) != CALIBRATION_KEY: return
-        
+        if getattr(key, 'char', None) != CALIBRATION_KEY:
+            return
         x, y = pyautogui.position()
         winsound.Beep(1000, 500)
-
-        print(f"{self.geo_keypoints[keypoint]} position is ({x}, {y})")
-
         UIInteractor.click_on_position(x, y)
         UIInteractor.click_on_position(*self.positions["confirm"])
         UIInteractor.move_to_position(*self.positions["window_BR"])
         UIInteractor.go_to_next_round()
-
         self.positions[keypoint] = [x, y]
         self.calibrate_true_geo_keypoint(keypoint)
-
         return False
 
     def calibrate_keypoints(self) -> dict:
@@ -70,29 +68,26 @@ class Calibrator:
         return self.positions
 
     def calibrate_ui_keypoints(self) -> dict:
-        for keypoint, human_readable_keypoint in self.ui_keypoints.items():
-            print(f"Place cursor at {human_readable_keypoint} and press key '{CALIBRATION_KEY}'")
+        for keypoint, label in self.ui_keypoints.items():
+            self.show_instruction(f"Place the cursor at {label} and press '{CALIBRATION_KEY}'.")
             with Listener(on_press=lambda key: self.on_press_ui_keypoints(key, keypoint)) as listener:
                 listener.join(30)
-
         return self.positions
-    
+
     def calibrate_geo_keypoints(self) -> dict:
-        for keypoint, human_readable_keypoint in self.geo_keypoints.items():
-            print(f"Place cursor at {human_readable_keypoint} and press key '{CALIBRATION_KEY}'")
+        for keypoint, label in self.geo_keypoints.items():
+            self.show_instruction(f"Place the cursor at {label} and press '{CALIBRATION_KEY}'.")
             with Listener(on_press=lambda key: self.on_press_geo_keypoints(key, keypoint)) as listener:
                 listener.join(30)
-
         return self.positions
 
     def calibrate_true_geo_keypoint(self, keypoint: str) -> dict:
         calibration_game_data = self.geoguessr_client.get_game_data(self.game_token)
         last_calibration_guess = calibration_game_data["player"]["guesses"][-1]
         geo_coords = (last_calibration_guess["lat"], last_calibration_guess["lng"])
-        print(f"True geolocation of {self.geo_keypoints[keypoint]} is {geo_coords}")      
-        self.positions[keypoint+"_true"] = geo_coords
+        self.positions[keypoint + "_true"] = geo_coords
         return self.positions
-    
+
     def capture_calibration_map(self):
         ui_interactor = UIInteractor(self.positions)
         ui_interactor.click_on_confirm()
@@ -102,8 +97,7 @@ class Calibrator:
     def get_base64_calibration_map() -> Optional[str]:
         try:
             with open(CALIBRATION_MAP_FILE) as file:
-                calibration_map_base64_image = file.read()
+                return file.read()
         except:
             print("Couldn't found calibration map file.")
-            calibration_map_base64_image = None
-        return calibration_map_base64_image
+            return None

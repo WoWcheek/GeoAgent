@@ -1,6 +1,5 @@
 from db import *
 from LLM import *
-from config import *
 from time import sleep
 from typing import Tuple, List
 from LLM import LlmGuess, LlmWrapper
@@ -11,6 +10,7 @@ from core.geo_processor import GeoProcessor
 from core.image_handler import ImageHandler
 from core.geo_map_helper import GeoMapHelper
 from geoguessr.client import GeoGuessrClient
+from config import ROUND_DELAY, ROUNDS_NUMBER
 from ui.browser_interactor import BrowserInteractor
 
 class GeoAgent:
@@ -28,9 +28,9 @@ class GeoAgent:
         game_token = browser_interactor.get_game_token()
         self.game = self.save_initial_game_data(game_token)
         self.geoguessr_utils = GeoGuessrUtils(self.game.max_distance_km)
-
+        
+        sleep(ROUND_DELAY)
         for _ in range(rounds_number):
-            sleep(PRE_ROUND_DELAY)
             game_data_after_round = self.play_round()
 
         self.game = self.save_completed_game_data(game_data_after_round)

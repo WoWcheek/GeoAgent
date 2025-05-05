@@ -48,19 +48,11 @@ class GeoMapHelper:
         calibration_map = ImageHandler.base64_to_gray_cv_image(calibration_map_base64)
         current_map = ImageHandler.PIL_to_gray_cv_image(current_map_PIL)
 
-        print("Before:", x, y)
-
         (shift_x, shift_y), _ = cv2.phaseCorrelate(calibration_map, current_map)
-
-        print(shift_x, shift_y)
 
         x += shift_x
         y += shift_y
 
-        print("After:", x, y)
-
         x_clipped, y_clipped = self.clip_map_coordinates(x, y)
-
-        print("Clipped:", x, y)
 
         return x_clipped, y_clipped
