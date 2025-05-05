@@ -1,5 +1,6 @@
 import pyautogui
 from PIL import Image
+from random import random
 from time import sleep
 from config import POST_CLICK_DELAY, CLICK_DURATION, POST_ROUND_DELAY
 
@@ -24,7 +25,11 @@ class UIInteractor:
         return pyautogui.screenshot(region=self.image_region)
     
     def take_map_screenshot(self) -> Image:
-        return pyautogui.screenshot(region=self.map_region)
+        image = pyautogui.screenshot(region=self.map_region)
+        random_num = random()
+        print(random_num)
+        image.save(f"mocks/{random_num}.png")
+        return image
     
     @staticmethod
     def move_to_position(x: int, y: int) -> None:

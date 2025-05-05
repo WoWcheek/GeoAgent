@@ -5,8 +5,8 @@ LLM_RETRY_LIMIT = 1
 START_GAME_KEY = "g"
 CALIBRATION_KEY = "c"
 
-KEYPOINTS_FILE = "ui/keypoints.json"
-CALIBRATION_MAP_FILE = "ui/calibration_map.txt"
+KEYPOINTS_FILE = "ui/calibration/keypoints.json"
+CALIBRATION_MAP_FILE = "ui/calibration/calibration_map.txt"
 
 AZURE_STORAGE_CONTAINER_NAME = "screenshots"
 

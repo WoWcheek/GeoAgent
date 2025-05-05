@@ -7,7 +7,7 @@ from config import *
 from time import sleep
 from typing import List
 from core.geo_agent import GeoAgent
-from ui.calibrator import Calibrator
+from ui.calibration.calibrator import Calibrator
 from pynput.keyboard import Key, KeyCode, Listener
 
 def calibrate_keypoints():
