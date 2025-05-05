@@ -17,20 +17,20 @@ class GeoMapHelper:
         self.point_NW_true_lat, self.point_NW_true_lon = keypoints["point_NW_true"]
         self.point_SE_true_lat, self.point_SE_true_lon = keypoints["point_SE_true"]
 
-        self.point_NW_true_mercator = self._geo_lat_to_mercator_y(self.point_NW_true_lat)
-        self.point_SE_true_mercator = self._geo_lat_to_mercator_y(self.point_SE_true_lat)
+        self.point_NW_true_mercator = self.geo_lat_to_mercator_y(self.point_NW_true_lat)
+        self.point_SE_true_mercator = self.geo_lat_to_mercator_y(self.point_SE_true_lat)
 
         self.lon_diff_ref = (self.point_NW_true_lon - self.point_SE_true_lon)
         self.lat_diff_ref = (self.point_NW_true_mercator - self.point_SE_true_mercator)
 
-    def _geo_lat_to_mercator_y(self, lat: float) -> float:
+    def geo_lat_to_mercator_y(self, lat: float) -> float:
         return math.log(math.tan(math.pi / 4 + math.radians(lat) / 2))
 
     def geolocation_to_map_coordinates(self, geolocation: Geolocation) -> Tuple[float, float]:
         lon_diff = (self.point_NW_true_lon - geolocation.longitude)
         x = abs(self.point_NW_user_x - self.point_SE_user_x) * (lon_diff / self.lon_diff_ref) + self.point_NW_user_x
 
-        mercator_y = self._geo_lat_to_mercator_y(geolocation.latitude)
+        mercator_y = self.geo_lat_to_mercator_y(geolocation.latitude)
         lat_diff = (self.point_NW_true_mercator - mercator_y)
         y = abs(self.point_NW_user_y - self.point_SE_user_y) * (lat_diff / self.lat_diff_ref) + self.point_NW_user_y
 

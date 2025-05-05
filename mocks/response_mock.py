@@ -1,5 +1,6 @@
-from config import TEST_RESPONSE_FILE
 from core.geolocation import Geolocation
+
+TEST_RESPONSE_FILE = "mocks/mocked_response.txt"
 
 class ResponseMock:
     def __init__(self, geolocation: Geolocation = None):

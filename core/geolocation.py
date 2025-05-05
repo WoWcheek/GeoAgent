@@ -7,3 +7,6 @@ class Geolocation:
     
     def is_valid(self) -> bool:
         return self.latitude is not None and self.longitude is not None
+    
+    def to_tuple(self):
+        return (self.latitude, self.longitude)

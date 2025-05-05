@@ -24,7 +24,7 @@ class Calibrator:
         self.geoguessr_client = GeoGuessrClient()
         self.browser_interactor = BrowserInteractor()
 
-    def _on_press_ui_keypoints(self, key: Optional[Key | KeyCode], keypoint: str):
+    def on_press_ui_keypoints(self, key: Optional[Key | KeyCode], keypoint: str):
         if getattr(key, 'char', None) != CALIBRATION_KEY: return
 
         x, y = pyautogui.position()
@@ -35,7 +35,7 @@ class Calibrator:
 
         return False
     
-    def _on_press_geo_keypoints(self, key: Optional[Key | KeyCode], keypoint: str):
+    def on_press_geo_keypoints(self, key: Optional[Key | KeyCode], keypoint: str):
         if getattr(key, 'char', None) != CALIBRATION_KEY: return
         
         x, y = pyautogui.position()
@@ -49,16 +49,16 @@ class Calibrator:
         UIInteractor.go_to_next_round()
 
         self.positions[keypoint] = [x, y]
-        self._calibrate_true_geo_keypoint(keypoint)
+        self.calibrate_true_geo_keypoint(keypoint)
 
         return False
 
     def calibrate_keypoints(self) -> dict:
-        self._calibrate_ui_keypoints()
-        self.game_id = self.browser_interactor.get_game_id()
-        self._calibrate_geo_keypoints()
+        self.calibrate_ui_keypoints()
+        self.game_token = self.browser_interactor.get_game_token()
+        self.calibrate_geo_keypoints()
 
-        calibration_map_image = self._capture_calibration_map()
+        calibration_map_image = self.capture_calibration_map()
         calibration_map_base64 = ImageHandler.PIL_image_to_base64(calibration_map_image)
 
         with open(CALIBRATION_MAP_FILE, "w") as file:
@@ -69,31 +69,31 @@ class Calibrator:
 
         return self.positions
 
-    def _calibrate_ui_keypoints(self) -> dict:
+    def calibrate_ui_keypoints(self) -> dict:
         for keypoint, human_readable_keypoint in self.ui_keypoints.items():
             print(f"Place cursor at {human_readable_keypoint} and press key '{CALIBRATION_KEY}'")
-            with Listener(on_press=lambda key: self._on_press_ui_keypoints(key, keypoint)) as listener:
+            with Listener(on_press=lambda key: self.on_press_ui_keypoints(key, keypoint)) as listener:
                 listener.join(30)
 
         return self.positions
     
-    def _calibrate_geo_keypoints(self) -> dict:
+    def calibrate_geo_keypoints(self) -> dict:
         for keypoint, human_readable_keypoint in self.geo_keypoints.items():
             print(f"Place cursor at {human_readable_keypoint} and press key '{CALIBRATION_KEY}'")
-            with Listener(on_press=lambda key: self._on_press_geo_keypoints(key, keypoint)) as listener:
+            with Listener(on_press=lambda key: self.on_press_geo_keypoints(key, keypoint)) as listener:
                 listener.join(30)
 
         return self.positions
 
-    def _calibrate_true_geo_keypoint(self, keypoint: str) -> dict:
-        calibration_game_data = self.geoguessr_client.get_game_data(self.game_id)
+    def calibrate_true_geo_keypoint(self, keypoint: str) -> dict:
+        calibration_game_data = self.geoguessr_client.get_game_data(self.game_token)
         last_calibration_guess = calibration_game_data["player"]["guesses"][-1]
         geo_coords = (last_calibration_guess["lat"], last_calibration_guess["lng"])
         print(f"True geolocation of {self.geo_keypoints[keypoint]} is {geo_coords}")      
         self.positions[keypoint+"_true"] = geo_coords
         return self.positions
     
-    def _capture_calibration_map(self):
+    def capture_calibration_map(self):
         ui_interactor = UIInteractor(self.positions)
         ui_interactor.click_on_confirm()
         return ui_interactor.take_map_screenshot()

@@ -9,8 +9,8 @@ class GeoGuessrClient:
         self.base_url = GEOGUESSR_API_BASE_URL
         self.session.cookies.set("_ncfa", os.environ.get("NCFA_TOKEN"), domain="www.geoguessr.com")
     
-    def get_game_data(self, game_id: str):
-        url = f"{self.base_url}/v3/games/{game_id}"
+    def get_game_data(self, game_token: str):
+        url = f"{self.base_url}/v3/games/{game_token}"
         response = self.session.get(url)
         if response.status_code == 200:
             return response.json()

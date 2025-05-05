@@ -19,6 +19,7 @@ class GameRepository:
 
         db_game.map = game.map
         db_game.player_id = game.player_id
+        db_game.max_distance_km = game.max_distance_km
         
         db_game.rounds_count = game.rounds_count
         db_game.total_score = game.total_score

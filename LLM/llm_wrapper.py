@@ -12,12 +12,12 @@ class LlmWrapper:
     def __init__(self, model_type: LLM_type, model_name: str, prompt_file_path: str):
         self.model = model_type(model=model_name)
 
-        self.db_id = self._get_db_model_id(model_type, model_name)
+        self.db_id = self.get_db_model_id(model_type, model_name)
 
         with open(prompt_file_path, "r") as f:
             self.text_instructions = f.read()
     
-    def _get_db_model_id(self, model_type: LLM_type, model_name: str) -> int:
+    def get_db_model_id(self, model_type: LLM_type, model_name: str) -> int:
         vendor = Vendor()
         vendor.name = model_type.__name__
         vendor_db = vendor_repo.add_vendor_if_not_exists(vendor)
@@ -54,10 +54,10 @@ class LlmWrapper:
         request_start_time = time()
         while not geolocation.is_valid() and retries <= LLM_RETRY_LIMIT:
             message = self.compose_prompt(images_base64)
-            response = self.model.invoke([message])
-            # response = ResponseMock()
+            # response = self.model.invoke([message])
+            response = ResponseMock()
             geolocation = self.extract_geolocation_from_llm_response(response.content)
             retries += 1
         request_end_time = time()
         seconds_spent = int(request_end_time - request_start_time)
-        return LlmGuess(response.content, geolocation, seconds_spent)
+        return LlmGuess(response.content, geolocation, seconds_spent, self.db_id)
