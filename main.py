@@ -7,8 +7,7 @@ from typing import List
 from dotenv import load_dotenv
 from tkinter import messagebox
 from core.geo_agent import GeoAgent
-from ui.calibration.calibrator import Calibrator
-from ui.user.models_dialog import ModelSelectorDialog
+from ui import Calibrator, ModelSelectorDialog
 from config import KEYPOINTS_FILE, CALIBRATION_MAP_FILE
 
 def calibrate_keypoints(root: tk.Tk):

@@ -1,14 +1,13 @@
 import json
 import winsound
+from ui import *
 import pyautogui
 import tkinter as tk
 from typing import Optional
 from tkinter import messagebox
-from ui.ui_interactor import UIInteractor
-from core.image_handler import ImageHandler
+from core import PIL_image_to_base64
 from geoguessr.client import GeoGuessrClient
 from pynput.keyboard import Key, KeyCode, Listener
-from ui.browser_interactor import BrowserInteractor
 from config import CALIBRATION_KEY, KEYPOINTS_FILE, CALIBRATION_MAP_FILE
 
 class Calibrator:
@@ -43,10 +42,10 @@ class Calibrator:
             return
         x, y = pyautogui.position()
         winsound.Beep(1000, 500)
-        UIInteractor.click_on_position(x, y)
-        UIInteractor.click_on_position(*self.positions["confirm"])
-        UIInteractor.move_to_position(*self.positions["window_BR"])
-        UIInteractor.go_to_next_round()
+        click_on_position(x, y)
+        click_on_position(*self.positions["confirm"])
+        move_to_position(*self.positions["window_BR"])
+        go_to_next_round()
         self.positions[keypoint] = [x, y]
         self.calibrate_true_geo_keypoint(keypoint)
         return False
@@ -57,7 +56,7 @@ class Calibrator:
         self.calibrate_geo_keypoints()
 
         calibration_map_image = self.capture_calibration_map()
-        calibration_map_base64 = ImageHandler.PIL_image_to_base64(calibration_map_image)
+        calibration_map_base64 = PIL_image_to_base64(calibration_map_image)
 
         with open(CALIBRATION_MAP_FILE, "w") as file:
             file.write(calibration_map_base64)
@@ -92,12 +91,3 @@ class Calibrator:
         ui_interactor = UIInteractor(self.positions)
         ui_interactor.click_on_confirm()
         return ui_interactor.take_map_screenshot()
-
-    @staticmethod
-    def get_base64_calibration_map() -> Optional[str]:
-        try:
-            with open(CALIBRATION_MAP_FILE) as file:
-                return file.read()
-        except:
-            print("Couldn't found calibration map file.")
-            return None

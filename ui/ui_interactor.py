@@ -1,7 +1,6 @@
 import pyautogui
 from PIL import Image
-from time import sleep
-from config import ROUND_DELAY
+from ui import move_to_position, click_on_position
 
 class UIInteractor:
     def __init__(self, keypoints: dict):
@@ -25,27 +24,12 @@ class UIInteractor:
     
     def take_map_screenshot(self) -> Image:
         return pyautogui.screenshot(region=self.map_region)
-    
-    @staticmethod
-    def move_to_position(x: int, y: int) -> None:
-        pyautogui.moveTo(x, y, duration=0.5)
-        sleep(1)
 
     def hover_over_map(self) -> None:
-        UIInteractor.move_to_position(*self.position_inside_map)
+        move_to_position(*self.position_inside_map)
 
     def move_away_from_map(self) -> None:
-        UIInteractor.move_to_position(*self.position_outside_map)
-
-    @staticmethod
-    def click_on_position(x: int, y: int) -> None:
-        pyautogui.click(x, y, duration=0.5)
-        sleep(1)
+        move_to_position(*self.position_outside_map)
     
     def click_on_confirm(self) -> None:
-        UIInteractor.click_on_position(*self.confirm_button_position)
-
-    @staticmethod
-    def go_to_next_round() -> None:
-        pyautogui.press(" ")
-        sleep(ROUND_DELAY)
+        click_on_position(*self.confirm_button_position)

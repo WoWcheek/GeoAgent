@@ -1,17 +1,11 @@
 from db import *
+from ui import *
 from LLM import *
 from time import sleep
+from geoguessr import *
 from typing import Tuple, List
-from LLM import LlmGuess, LlmWrapper
-from core.geolocation import Geolocation
-from ui.ui_interactor import UIInteractor
-from geoguessr.utils import GeoGuessrUtils
-from core.geo_processor import GeoProcessor
-from core.image_handler import ImageHandler
-from core.geo_map_helper import GeoMapHelper
-from geoguessr.client import GeoGuessrClient
 from config import ROUND_DELAY, ROUNDS_NUMBER
-from ui.browser_interactor import BrowserInteractor
+from core import GeoProcessor, ImageHandler, GeoMapHelper, Geolocation, PIL_image_to_base64
 
 class GeoAgent:
     def __init__(self, keypoints: dict, llm_wrappers: List[LlmWrapper]):
@@ -20,14 +14,13 @@ class GeoAgent:
         self.geo_processor = GeoProcessor()
         self.image_handler = ImageHandler()
         self.geoguessr_client = GeoGuessrClient()
-        self.interactor = UIInteractor(keypoints)
-        self.geo_map_helper = GeoMapHelper(keypoints, self.interactor)
+        self.ui_interactor = UIInteractor(keypoints)
+        self.browser_interactor = BrowserInteractor()
+        self.geo_map_helper = GeoMapHelper(keypoints, self.ui_interactor)
 
     def run(self, rounds_number: int = ROUNDS_NUMBER) -> None:
-        browser_interactor = BrowserInteractor()
-        game_token = browser_interactor.get_game_token()
+        game_token = self.browser_interactor.get_game_token()
         self.game = self.save_initial_game_data(game_token)
-        self.geoguessr_utils = GeoGuessrUtils(self.game.max_distance_km)
         
         sleep(ROUND_DELAY)
         for _ in range(rounds_number):
@@ -36,16 +29,16 @@ class GeoAgent:
         self.game = self.save_completed_game_data(game_data_after_round)
 
     def play_round(self):        
-        screenshot = self.interactor.take_image_screenshot()
-        screenshot = ImageHandler.preprocess(screenshot)
-        screenshot_b64 = ImageHandler.PIL_image_to_base64(screenshot)
+        screenshot = self.ui_interactor.take_image_screenshot()
+        screenshot = self.image_handler.preprocess(screenshot)
+        screenshot_b64 = PIL_image_to_base64(screenshot)
 
         guesses = [llm.get_llm_guess([screenshot_b64]) for llm in self.llm_wrappers]
         geolocations = [guess.geolocation for guess in guesses]
         aggregated_geolocation = self.geo_processor.aggregate_geolocations(geolocations)
 
         map_x, map_y = self.geo_map_helper.geolocation_to_map_coordinates(aggregated_geolocation)
-        self.interactor.hover_over_map()
+        self.ui_interactor.hover_over_map()
         map_x, map_y = self.geo_map_helper.adjust_map_coordinates(map_x, map_y)
         self.submit_guess((map_x, map_y))
 
@@ -65,10 +58,10 @@ class GeoAgent:
         return game_data
 
     def submit_guess(self, position: Tuple[int, int]) -> None:
-        self.interactor.click_on_position(*position)
-        self.interactor.click_on_confirm()
-        self.interactor.move_away_from_map()
-        self.interactor.go_to_next_round()
+        click_on_position(*position)
+        self.ui_interactor.click_on_confirm()
+        self.ui_interactor.move_away_from_map()
+        go_to_next_round()
 
     def save_guess_data(self, round_id: int, llm_guess: LlmGuess, true_geolocation: Geolocation) -> Guess:
         guess = Guess()
@@ -81,7 +74,7 @@ class GeoAgent:
         guess.seconds_spent = llm_guess.seconds_spent
 
         guess.distance_km = self.geo_processor.get_haversine_distance(llm_guess.geolocation, true_geolocation)
-        guess.score = self.geoguessr_utils.calculate_score(guess.distance_km)
+        guess.score = calculate_geoguessr_score(guess.distance_km, self.game.max_distance_km)
 
         return guess_repo.add_guess(guess)
 
@@ -126,8 +119,7 @@ class GeoAgent:
         game_db.max_distance_km = max_distance
         game_db.player_id = game_data["player"]["id"]
         game_db.rounds_count = len(game_data["player"]["guesses"])
-        game_db.start_datetime_utc = GeoGuessrUtils.parse_geoguessr_datetime(
-            game_data["rounds"][0]["startTime"])
+        game_db.start_datetime_utc = parse_geoguessr_datetime(game_data["rounds"][0]["startTime"])
         
         return game_repo.add_game_if_not_exists(game_db)
 

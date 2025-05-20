@@ -1,11 +1,11 @@
 import cv2
 import math
+from ui import *
 from numpy import clip
 from typing import Tuple
-from core.geolocation import Geolocation
+from core import Geolocation
 from ui.ui_interactor import UIInteractor
-from core.image_handler import ImageHandler
-from ui.calibration.calibrator import Calibrator
+from core import base64_to_gray_cv_image, PIL_to_gray_cv_image
 
 class GeoMapHelper:
     def __init__(self, keypoints: dict, ui_interactor: UIInteractor):
@@ -42,11 +42,11 @@ class GeoMapHelper:
         return clipped_map_x, clipped_map_y
     
     def adjust_map_coordinates(self, x: float, y: float) -> Tuple[float, float]:
-        calibration_map_base64 = Calibrator.get_base64_calibration_map()
+        calibration_map_base64 = get_base64_calibration_map()
         current_map_PIL = self.ui_interactor.take_map_screenshot()
 
-        calibration_map = ImageHandler.base64_to_gray_cv_image(calibration_map_base64)
-        current_map = ImageHandler.PIL_to_gray_cv_image(current_map_PIL)
+        calibration_map = base64_to_gray_cv_image(calibration_map_base64)
+        current_map = PIL_to_gray_cv_image(current_map_PIL)
 
         (shift_x, shift_y), _ = cv2.phaseCorrelate(calibration_map, current_map)
 

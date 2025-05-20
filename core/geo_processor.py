@@ -1,7 +1,7 @@
 import math
+from core import Geolocation
 from typing import List, Optional
 from geopy.geocoders import Nominatim
-from core.geolocation import Geolocation
 
 class GeoProcessor:
     def __init__(self):
