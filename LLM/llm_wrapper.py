@@ -4,7 +4,6 @@ from typing import List
 from LLM import LlmGuess, LLM_type
 from config import LLM_RETRY_LIMIT
 from core.geolocation import Geolocation
-from mocks.response_mock import ResponseMock
 from langchain_core.messages import HumanMessage
 from db import Vendor, Model, vendor_repo, model_repo
 
@@ -39,7 +38,7 @@ class LlmWrapper:
 
     def extract_geolocation_from_llm_response(self, llm_response: str) -> Geolocation:
         try:
-            match = re.search(r"lat:\s*(-?\d+\.\d+),\s*lng:\s*(-?\d+\.\d+)", llm_response.lower())
+            match = re.search(r"lat:\s*(-?\d+\.\d+),\s*lng:\s*(-?\d+\.\d+)", llm_response.lower().replace("*", ""))
             if match is None: raise Exception("Geolocation is not provided or does not match required format.")
             lat = float(match.group(1))
             lng = float(match.group(2))
@@ -54,8 +53,7 @@ class LlmWrapper:
         request_start_time = time()
         while not geolocation.is_valid() and retries <= LLM_RETRY_LIMIT:
             message = self.compose_prompt(images_base64)
-            # response = self.model.invoke([message])
-            response = ResponseMock()
+            response = self.model.invoke([message])
             geolocation = self.extract_geolocation_from_llm_response(response.content)
             retries += 1
         request_end_time = time()

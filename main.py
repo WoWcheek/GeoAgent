@@ -1,12 +1,12 @@
 import os
 import json
 import winsound
-from LLM import *
 import tkinter as tk
 from typing import List
 from dotenv import load_dotenv
 from tkinter import messagebox
 from core.geo_agent import GeoAgent
+from LLM import *
 from ui import Calibrator, ModelSelectorDialog
 from config import KEYPOINTS_FILE, CALIBRATION_MAP_FILE
 

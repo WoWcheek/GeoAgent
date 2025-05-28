@@ -1,9 +1,13 @@
+import os
 from db.models import *
 from db.repositories import *
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine('mssql+pyodbc://localhost/geo_agent?driver=ODBC+Driver+17+for+SQL+Server&trusted_connection=yes')
+load_dotenv()
+connection_string = os.getenv("DB_CONNECTION_STRING")
+engine = create_engine(connection_string)
 Session = sessionmaker(bind=engine)
 session = Session()
 

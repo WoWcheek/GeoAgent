@@ -17,8 +17,7 @@ class ImageRepository:
 
     def save_image(self, image: Image, game_token: str, round_number: int) -> str:
         image_path = f"{game_token}/{round_number}.png"
-        # img_bytes = BytesIO()
-        # image.save(img_bytes, format='PNG')
-        # img_bytes.seek(0)
-        # self.container_client.upload_blob(image_path, img_bytes, content_settings=self.image_settings)
-        return f"{self.container_name}:{image_path}"
+        img_bytes = BytesIO()
+        image.save(img_bytes, format='PNG')
+        img_bytes.seek(0)
+        return self.container_client.upload_blob(image_path, img_bytes, content_settings=self.image_settings).url

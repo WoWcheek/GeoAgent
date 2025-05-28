@@ -16,3 +16,14 @@ class GeoGuessrClient:
             return response.json()
         else:
             raise Exception(f"Error fetching game data: {response.status_code}")
+    
+    def get_map_data(self, map: str):
+        url = f"{self.base_url}/v3/social/maps/browse/popular/official"
+        response = self.session.get(url)
+        if response.status_code == 200:
+            maps = response.json()
+            for m in maps:
+                if m['name'].lower() == map.lower():
+                    return m
+        else:
+            raise Exception(f"Error fetching map data: {response.status_code}")
